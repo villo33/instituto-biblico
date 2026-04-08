@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title> Misión Celestial</title>
+<link rel="stylesheet" href="style.css">
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(-45deg, #38bdf8, #0ea5e9, #0284c7, #7dd3fc);
+    background-size: 400% 400%;
+    animation: fondoAnimado 10s ease infinite;
+    color: #0c4a6e;
+}
+
+@keyframes fondoAnimado{
+    0%{ background-position: 0% 50%; }
+    50%{ background-position: 100% 50%; }
+    100%{ background-position: 0% 50%; }
+}
+
+/* CONTENEDOR */
+.container {
+    text-align: center;
+    padding: 30px 15px;
+    animation: aparecer 0.8s ease;
+}
+
+@keyframes aparecer{
+    from{
+        opacity:0;
+        transform: translateY(20px);
+    }
+    to{
+        opacity:1;
+        transform: translateY(0);
+    }
+}
+
+/* TÍTULO 🔥 CORREGIDO */
+h2 {
+    font-size: 28px;
+    margin-bottom: 5px;
+    color: #0c4a6e; /* antes blanco */
+    background: rgba(255,255,255,0.8);
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.subtitulo {
+    font-size: 14px;
+    opacity: 0.9;
+    margin-bottom: 25px;
+    color: #e0f2fe;
+}
+
+/* GRID */
+.menu {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 15px;
+    max-width: 600px;
+    margin: auto;
+}
+
+/* TARJETAS */
+.card {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(8px);
+    padding: 20px;
+    border-radius: 15px;
+    text-decoration: none;
+    color: #0c4a6e;
+    transition: 0.3s;
+    border: 1px solid rgba(255,255,255,0.5);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+/* HOVER */
+.card:hover {
+    background: #0ea5e9;
+    color: white;
+    transform: translateY(-6px) scale(1.03);
+    box-shadow: 0 10px 25px rgba(14, 165, 233, 0.6);
+}
+
+/* ICONOS */
+.icono {
+    font-size: 32px;
+    margin-bottom: 8px;
+    transition: 0.3s;
+}
+
+.card:hover .icono{
+    transform: scale(1.2) rotate(5deg);
+}
+
+/* TEXTO */
+.card h3 {
+    font-size: 16px;
+    margin: 5px 0;
+}
+
+.card p {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+/* FOOTER */
+.footer {
+    margin-top: 25px;
+    font-size: 12px;
+    opacity: 0.7;
+    color: #e0f2fe;
+}
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+    <h2>📖 Instituto Biblico Misión Celestial</h2>
+    <p class="subtitulo">Sistema de Gestión</p>
+
+    <div class="menu">
+        
+        <a href="estudiantes.html" class="card">
+            <div class="icono">📚</div>
+            <h3>Estudiantes</h3>
+            <p>Administrar</p>
+        </a>
+
+        <a href="profesores.html" class="card">
+            <div class="icono">👨‍🏫</div>
+            <h3>Profesores</h3>
+            <p>Gestionar</p>
+        </a>
+
+        <a href="notas.html" class="card">
+            <div class="icono">📝</div>
+            <h3>Notas</h3>
+            <p>Académico</p>
+        </a>
+
+        <a href="pagos.html" class="card">
+            <div class="icono">💰</div>
+            <h3>Pagos</h3>
+            <p>Finanzas</p>
+        </a>
+
+        <a href="abonos.html" class="card">
+            <div class="icono">💵</div>
+            <h3>Abonos</h3>
+            <p>Control de pagos</p>
+        </a>
+
+        <a href="consulta_estudiante.html" class="card">
+            <div class="icono">🔍</div>
+            <h3>Consulta</h3>
+            <p>Ver notas y deudas</p>
+        </a>
+
+    </div>
+
+    <div class="footer">
+        © ovidio camaño
+    </div>
+
+</div>
+
+</body>
+</html>

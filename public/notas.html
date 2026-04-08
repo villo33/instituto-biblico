@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="style.css">
+
+<style>
+
+/* ===== FONDO ANIMADO ===== */
+body{
+    font-family: Arial, sans-serif;
+    margin:0;
+    min-height:100vh;
+    background: linear-gradient(-45deg, #007bff, #00c6ff, #0056b3, #00aaff);
+    background-size: 400% 400%;
+    animation: fondoAnimado 12s ease infinite;
+}
+
+@keyframes fondoAnimado{
+    0%{ background-position: 0% 50%; }
+    50%{ background-position: 100% 50%; }
+    100%{ background-position: 0% 50%; }
+}
+
+/* ===== CONTENEDOR ===== */
+.container{
+    max-width: 1000px;
+    margin:40px auto;
+    padding:25px;
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(15px);
+    border-radius:25px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.25);
+    animation: aparecer 0.8s ease;
+}
+
+@keyframes aparecer{
+    from{
+        opacity:0;
+        transform: translateY(20px);
+    }
+    to{
+        opacity:1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== TITULO ===== */
+h2{
+    text-align:center;
+    color:white;
+    margin-bottom:20px;
+    font-size:28px;
+    text-shadow:0 5px 15px rgba(0,0,0,0.4);
+}
+
+/* ===== INPUTS ===== */
+input, select{
+    width:100%;
+    padding:12px;
+    margin-bottom:10px;
+    border-radius:10px;
+    border:none;
+    outline:none;
+    font-size:14px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+    transition:0.3s;
+}
+
+input:focus, select:focus{
+    transform: scale(1.02);
+    box-shadow:0 0 10px rgba(0,123,255,0.5);
+}
+
+/* ===== TOP BAR ===== */
+.top-bar{
+    display:flex;
+    gap:10px;
+    margin-bottom:10px;
+}
+
+/* ===== BOTONES ===== */
+.btn{
+    padding:10px 18px;
+    border:none;
+    border-radius:30px;
+    cursor:pointer;
+    color:white;
+    transition: all 0.3s ease;
+    box-shadow:0 5px 15px rgba(0,0,0,0.2);
+}
+
+.guardar{ background:#007bff; }
+.inicio{ background:#0056b3; }
+.editar{ background:#007bff; }
+.eliminar{ background:#dc3545; }
+
+.btn:hover{
+    transform: translateY(-3px) scale(1.05);
+}
+
+/* ===== BUSCADOR ===== */
+#filtro{
+    margin-top:10px;
+}
+
+button:not(.btn){
+    padding:10px;
+    border:none;
+    border-radius:10px;
+    background:#007bff;
+    color:white;
+    cursor:pointer;
+    margin-bottom:10px;
+}
+
+/* ===== TABLA ===== */
+table{
+    width:100%;
+    margin-top:20px;
+    border-collapse: collapse;
+    border-radius:12px;
+    overflow:hidden;
+    background:white;
+    box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+
+thead{
+    background:#007bff;
+    color:white;
+    letter-spacing:1px;
+}
+
+td, th{
+    padding:12px;
+    text-align:center;
+}
+
+tbody tr{
+    border-bottom:1px solid #eee;
+    transition: all 0.3s;
+}
+
+tbody tr:hover{
+    background:#eaf4ff;
+    transform: scale(1.01);
+}
+
+/* ===== ANIMACIÓN FILAS ===== */
+tbody tr{
+    animation: fadeRow 0.4s ease;
+}
+
+@keyframes fadeRow{
+    from{
+        opacity:0;
+        transform: translateY(10px);
+    }
+    to{
+        opacity:1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== ACCIONES ===== */
+.acciones{
+    display:flex;
+    gap:6px;
+    justify-content:center;
+}
+
+/* ===== PROMEDIO DESTACADO ===== */
+#promedio{
+    margin-top:20px;
+    text-align:right;
+    font-size:20px;
+    font-weight:bold;
+    color:white;
+    text-shadow:0 3px 10px rgba(0,0,0,0.4);
+}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:600px){
+    .container{
+        margin:10px;
+        padding:15px;
+    }
+
+    td, th{
+        font-size:12px;
+    }
+
+    .top-bar{
+        flex-direction:column;
+    }
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="container">
+<h2>📝 Gestión de Notas</h2>
+
+<!-- SELECT ESTUDIANTES -->
+<select id="estudiante_id"></select>
+
+<input id="materia" placeholder="Materia">
+<input id="nota" type="number" placeholder="Nota">
+<input id="fecha" type="date">
+
+<div class="top-bar">
+    <button class="btn guardar" onclick="guardar()">Guardar</button>
+    <button class="btn inicio" onclick="volver()">Inicio</button>
+</div>
+
+<!-- FILTRO -->
+<input id="filtro" placeholder="Filtrar por estudiante">
+<button onclick="filtrar()">Buscar</button>
+
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Estudiante</th>
+<th>Materia</th>
+<th>Nota</th>
+<th>Fecha</th>
+<th>Acciones</th>
+</tr>
+</thead>
+<tbody id="tabla"></tbody>
+</table>
+
+<h3 id="promedio"></h3>
+
+</div>
+
+<script>
+let idEditar = null;
+let datosGlobal = [];
+
+/* ================= GUARDAR ================= */
+function guardar(){
+
+    const datos={
+        estudiante_id: estudiante_id.value,
+        materia: materia.value,
+        nota: nota.value,
+        fecha: fecha.value || null
+    };
+
+    if(!datos.estudiante_id || !datos.materia || !datos.nota){
+        alert("⚠️ Completa todos los campos");
+        return;
+    }
+
+    const url = idEditar ? "/notas/"+idEditar : "/notas";
+    const metodo = idEditar ? "PUT" : "POST";
+
+    fetch(url,{
+        method: metodo,
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify(datos)
+    })
+    .then(r=>r.json())
+    .then(res=>{
+        alert(res.mensaje || "Guardado");
+        reset();
+    })
+    .catch(()=>alert("Error al guardar"));
+}
+
+/* ================= CARGAR ================= */
+function cargar(){
+    fetch("/notas")
+    .then(r=>r.json())
+    .then(data=>{
+        datosGlobal = data;
+        pintarTabla(data);
+        calcularPromedio(data);
+    })
+    .catch(()=>alert("Error cargando notas"));
+}
+
+/* ================= FORMATO FECHA ================= */
+function formatearFecha(f){
+    if(!f) return "";
+    const fecha = new Date(f);
+    return fecha.toLocaleDateString();
+}
+
+/* ================= PINTAR TABLA ================= */
+function pintarTabla(data){
+    tabla.innerHTML="";
+
+    data.forEach(n=>{
+
+        const nombreCompleto = (n.nombre || "") + " " + (n.apellido || "");
+
+        tabla.innerHTML+=`
+        <tr>
+            <td>${n.id}</td>
+            <td>${nombreCompleto}</td>
+            <td>${n.materia}</td>
+            <td><b>${n.nota}</b></td>
+            <td>${formatearFecha(n.fecha)}</td>
+            <td>
+                <div class="acciones">
+                    <button class="btn editar" onclick='editar(${n.id},"${n.materia}",${n.nota},"${n.fecha || ""}",${n.estudiante_id})'>✏️</button>
+                    <button class="btn eliminar" onclick="eliminar(${n.id})">🗑️</button>
+                </div>
+            </td>
+        </tr>`;
+    });
+}
+
+/* ================= EDITAR ================= */
+function editar(idN,m,n,f,est){
+    idEditar=idN;
+    materia.value=m;
+    nota.value=n;
+    fecha.value = f ? f.split("T")[0] : "";
+    estudiante_id.value=est;
+}
+
+/* ================= ELIMINAR ================= */
+function eliminar(id){
+    if(confirm("¿Eliminar esta nota?")){
+        fetch("/notas/"+id,{method:"DELETE"})
+        .then(()=>cargar())
+        .catch(()=>alert("Error al eliminar"));
+    }
+}
+
+/* ================= RESET ================= */
+function reset(){
+    idEditar=null;
+    estudiante_id.value="";
+    materia.value="";
+    nota.value="";
+    fecha.value="";
+    cargar();
+}
+
+/* ================= VOLVER ================= */
+function volver(){
+    window.location.href="/";
+}
+
+/* ================= PROMEDIO ================= */
+function calcularPromedio(data){
+    if(data.length === 0){
+        promedio.innerText = "";
+        return;
+    }
+
+    let suma = 0;
+    data.forEach(n => suma += Number(n.nota));
+
+    const prom = (suma / data.length).toFixed(2);
+
+    promedio.innerText = "📊 Promedio general: " + prom;
+}
+
+/* ================= FILTRAR ================= */
+function filtrar(){
+    const texto = filtro.value.toLowerCase();
+
+    const filtrados = datosGlobal.filter(n =>
+        (n.nombre + " " + n.apellido).toLowerCase().includes(texto)
+    );
+
+    pintarTabla(filtrados);
+    calcularPromedio(filtrados);
+}
+
+/* ================= CARGAR ESTUDIANTES ================= */
+function cargarEstudiantes(){
+    fetch("/estudiantes")
+    .then(r=>r.json())
+    .then(data=>{
+        estudiante_id.innerHTML = "<option value=''>Seleccionar estudiante</option>";
+
+        data.forEach(e=>{
+            const option = document.createElement("option");
+            option.value = e.id;
+            option.textContent = e.nombre + " " + e.apellido;
+            estudiante_id.appendChild(option);
+        });
+    })
+    .catch(()=>alert("Error cargando estudiantes"));
+}
+
+/* ================= INICIO ================= */
+window.onload = function(){
+    cargar();
+    cargarEstudiantes();
+};
+</script>
+
+</body>
+</html>

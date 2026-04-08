@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="style.css">
+
+<style>
+
+/* ===== FONDO ANIMADO ===== */
+body{
+    font-family: Arial, sans-serif;
+    margin:0;
+    min-height:100vh;
+    background: linear-gradient(-45deg, #007bff, #00c6ff, #0056b3, #00aaff);
+    background-size: 400% 400%;
+    animation: fondoAnimado 12s ease infinite;
+}
+
+@keyframes fondoAnimado{
+    0%{ background-position: 0% 50%; }
+    50%{ background-position: 100% 50%; }
+    100%{ background-position: 0% 50%; }
+}
+
+/* ===== CONTENEDOR ===== */
+.container{
+    max-width: 1000px;
+    margin:40px auto;
+    padding:25px;
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(15px);
+    border-radius:25px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.25);
+}
+
+/* ===== TITULO ===== */
+h2{
+    text-align:center;
+    color:white;
+    margin-bottom:20px;
+}
+
+/* ===== INPUTS ===== */
+input, select{
+    width:100%;
+    margin-bottom:10px;
+    padding:12px;
+    border-radius:10px;
+    border:none;
+}
+
+/* ===== SALDO ===== */
+#saldoVista{
+    text-align:right;
+    font-size:20px;
+    font-weight:bold;
+    color:white;
+}
+
+/* ===== BOTONES ===== */
+.btn{
+    padding:10px 18px;
+    border:none;
+    border-radius:30px;
+    cursor:pointer;
+    color:white;
+}
+
+.guardar{ background:#007bff; }
+.inicio{ background:#0056b3; }
+.editar{ background:#007bff; }
+.eliminar{ background:#dc3545; }
+
+/* ===== TABLA ===== */
+table{
+    width:100%;
+    margin-top:20px;
+    border-collapse: collapse;
+    background:white;
+}
+
+thead{
+    background:#007bff;
+    color:white;
+}
+
+td, th{
+    text-align:center;
+    padding:12px;
+}
+
+/* ===== ESTADOS ===== */
+.pagado{ color:green; font-weight:bold; }
+.deuda{ color:red; font-weight:bold; }
+
+/* ===== ACCIONES ===== */
+.acciones{
+    display:flex;
+    gap:6px;
+    justify-content:center;
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="container">
+<h2>💰 Gestión de Pagos</h2>
+
+<select id="estudiante_id"></select>
+
+<input id="total" type="text" placeholder="Monto Total" oninput="formatearInput(this)">
+<input id="abono" type="text" placeholder="Abono (opcional)" oninput="formatearInput(this)">
+<input id="fecha" type="date">
+
+<h3 id="saldoVista"></h3>
+
+<div class="top-bar">
+    <button class="btn guardar" onclick="guardar()">Guardar</button>
+    <button class="btn inicio" onclick="volver()">Inicio</button>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Estudiante</th>
+<th>Total</th>
+<th>Abono</th>
+<th>Saldo</th>
+<th>Fecha</th>
+<th>Estado</th>
+<th>Acciones</th>
+</tr>
+</thead>
+<tbody id="tabla"></tbody>
+</table>
+
+</div>
+
+<script>
+let idEditar = null;
+
+/* ================= FORMATO ================= */
+function formatear(num){
+    return Number(num).toLocaleString("es-CO");
+}
+
+function limpiarNumero(valor){
+    function formatearInput(input){
+
+    let valor = input.value.replace(/\D/g, "");
+
+    if(valor === ""){
+        input.value = "";
+        return;
+    }
+
+    input.value = Number(valor).toLocaleString("es-CO");
+}
+    return valor.replace(/\./g,"");
+}
+
+/* ================= CALCULAR SALDO ================= */
+function calcularSaldoVista(){
+    const t = Number(limpiarNumero(total.value)) || 0;
+    const a = Number(limpiarNumero(abono.value)) || 0;
+    const saldo = t - a;
+
+    saldoVista.innerText = "💵 Saldo: $" + formatear(saldo);
+}
+
+total.addEventListener("input", calcularSaldoVista);
+abono.addEventListener("input", calcularSaldoVista);
+
+/* ================= GUARDAR ================= */
+function guardar(){
+
+    const datos = {
+        estudiante_id: estudiante_id.value,
+        total: limpiarNumero(total.value),
+        abono: limpiarNumero(abono.value),
+        fecha: fecha.value
+    };
+
+    if(!datos.estudiante_id || !datos.total){
+        alert("⚠️ Completa los campos");
+        return;
+    }
+
+    const url = idEditar ? "/pagos/"+idEditar : "/pagos";
+    const metodo = idEditar ? "PUT" : "POST";
+
+    fetch(url,{
+        method: metodo,
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify(datos)
+    })
+    .then(()=>reset());
+}
+
+/* ================= CARGAR ================= */
+function cargar(){
+    fetch("/pagos")
+    .then(r=>r.json())
+    .then(data=>{
+        tabla.innerHTML="";
+
+        data.forEach(p=>{
+
+            const estado = p.saldo == 0 
+                ? "<span class='pagado'>✔ Pagado</span>"
+                : "<span class='deuda'>❌ Deuda</span>";
+
+            tabla.innerHTML+=`
+            <tr>
+                <td>${p.id}</td>
+                <td>${p.nombre}</td>
+                <td>$${formatear(p.total)}</td>
+                <td>$${formatear(p.abono || 0)}</td>
+                <td>$${formatear(p.saldo)}</td>
+                <td>${p.fecha ? new Date(p.fecha).toLocaleDateString() : ""}</td>
+                <td>${estado}</td>
+                <td>
+                    <div class="acciones">
+                        <button class="btn editar" onclick="editar(${p.id},${p.total},${p.abono},${p.estudiante_id},'${p.fecha || ""}')">✏️</button>
+                        <button class="btn eliminar" onclick="eliminar(${p.id})">🗑️</button>
+                        <button class="btn guardar" onclick="irAbonos(${p.id})">💸</button>
+                    </div>
+                </td>
+            </tr>`;
+        });
+    });
+}
+
+/* ================= IR A ABONOS ================= */
+function irAbonos(id){
+    window.location.href = "abonos.html?pago_id=" + id;
+}
+
+/* ================= EDITAR ================= */
+function editar(idP,t,a,est,f){
+    idEditar=idP;
+    total.value=formatear(t);
+    abono.value=formatear(a || 0);
+    estudiante_id.value=est;
+    fecha.value = f ? f.split("T")[0] : "";
+    calcularSaldoVista();
+}
+
+/* ================= ELIMINAR ================= */
+function eliminar(id){
+    if(confirm("¿Eliminar este pago?")){
+        fetch("/pagos/"+id,{method:"DELETE"})
+        .then(()=>cargar());
+    }
+}
+
+/* ================= RESET ================= */
+function reset(){
+    idEditar=null;
+    estudiante_id.value="";
+    total.value="";
+    abono.value="";
+    fecha.value="";
+    saldoVista.innerText="";
+    cargar();
+}
+
+/* ================= ESTUDIANTES ================= */
+function cargarEstudiantes(){
+    fetch("/estudiantes")
+    .then(r=>r.json())
+    .then(data=>{
+        estudiante_id.innerHTML="<option value=''>Seleccionar estudiante</option>";
+
+        data.forEach(e=>{
+            const option = document.createElement("option");
+            option.value = e.id;
+            option.textContent = e.nombre + " " + e.apellido;
+            estudiante_id.appendChild(option);
+        });
+    });
+}
+
+/* ================= VOLVER ================= */
+function volver(){
+    window.location.href="index.html";
+}
+
+/* ================= INICIO ================= */
+window.onload = function(){
+    cargar();
+    cargarEstudiantes();
+};
+</script>
+
+</body>
+</html>

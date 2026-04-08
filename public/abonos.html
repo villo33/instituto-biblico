@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="style.css">
+
+<style>
+
+/* ===== FONDO ANIMADO ===== */
+body{
+    font-family: Arial, sans-serif;
+    margin:0;
+    min-height:100vh;
+    background: linear-gradient(-45deg, #007bff, #00c6ff, #0056b3, #00aaff);
+    background-size: 400% 400%;
+    animation: fondoAnimado 12s ease infinite;
+}
+
+@keyframes fondoAnimado{
+    0%{ background-position: 0% 50%; }
+    50%{ background-position: 100% 50%; }
+    100%{ background-position: 0% 50%; }
+}
+
+/* ===== CONTENEDOR ===== */
+.container{
+    max-width: 1000px;
+    margin:40px auto;
+    padding:25px;
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(15px);
+    border-radius:25px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.25);
+}
+
+/* ===== TITULO ===== */
+h2{
+    text-align:center;
+    color:white;
+    margin-bottom:20px;
+}
+
+/* ===== INPUTS ===== */
+input, select{
+    width:100%;
+    margin-bottom:10px;
+    padding:12px;
+    border-radius:10px;
+    border:none;
+}
+
+/* ===== INFO ===== */
+.info{
+    color:white;
+    font-weight:bold;
+    margin-bottom:10px;
+    text-align:right;
+}
+
+/* ===== BOTONES ===== */
+.btn{
+    padding:10px 18px;
+    border:none;
+    border-radius:30px;
+    cursor:pointer;
+    color:white;
+}
+
+.guardar{ background:#007bff; }
+.inicio{ background:#0056b3; }
+.eliminar{ background:#dc3545; }
+
+/* ===== TABLA ===== */
+table{
+    width:100%;
+    margin-top:20px;
+    border-collapse: collapse;
+    background:white;
+}
+
+thead{
+    background:#007bff;
+    color:white;
+}
+
+td, th{
+    text-align:center;
+    padding:12px;
+}
+
+/* ===== ACCIONES ===== */
+.acciones{
+    display:flex;
+    justify-content:center;
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="container">
+<h2>💸 Gestión de Abonos</h2>
+
+<select id="pago_id"></select>
+
+<input id="monto" placeholder="Monto a abonar" oninput="formatearInput(this)">
+<input id="fecha" type="date">
+
+<div class="info" id="infoPago"></div>
+
+<button class="btn guardar" onclick="guardar()">Guardar Abono</button>
+<button class="btn inicio" onclick="volver()">Volver</button>
+
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Estudiante</th>
+<th>Monto</th>
+<th>Fecha</th>
+<th>Acciones</th>
+</tr>
+</thead>
+<tbody id="tabla"></tbody>
+</table>
+
+</div>
+
+<script>
+
+/* ================= FORMATO ================= */
+function formatear(num){
+    return Number(num).toLocaleString("es-CO");
+}
+
+function limpiarNumero(valor){
+    return valor.replace(/\./g,"");
+}
+function formatearInput(input){
+
+    let valor = input.value.replace(/\D/g, ""); // solo números
+
+    valor = Number(valor).toLocaleString("es-CO");
+
+    input.value = valor;
+}
+
+/* ================= CARGAR PAGOS ================= */
+function cargarPagos(){
+    fetch("/pagos")
+    .then(r=>r.json())
+    .then(data=>{
+
+        pago_id.innerHTML="<option value=''>Seleccionar estudiante / deuda</option>";
+
+        data.forEach(p=>{
+            const option = document.createElement("option");
+            option.value = p.id;
+            option.textContent = p.nombre + " " + p.apellido + " - Saldo: $" + formatear(p.saldo);
+            pago_id.appendChild(option);
+        });
+
+        // 🔥 AUTO SELECCIONAR EL PRIMERO
+        if(data.length > 0){
+            pago_id.value = data[0].id;
+            cargar(); // 🔥 cargar abonos automáticamente
+        }
+    });
+}
+
+/* ================= GUARDAR ================= */
+function guardar(){
+
+    if(!pago_id.value){
+        alert("⚠️ Selecciona un estudiante");
+        return;
+    }
+
+    const datos = {
+        pago_id: pago_id.value,
+        monto: limpiarNumero(monto.value),
+        fecha: fecha.value
+    };
+
+    if(!datos.monto){
+        alert("⚠️ Ingresa el monto");
+        return;
+    }
+
+    fetch("/abonos",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify(datos)
+    })
+    .then(r=>r.json())
+    .then(res=>{
+        alert(res.mensaje);
+        monto.value="";
+        fecha.value="";
+        cargar(); // recargar tabla
+    });
+}
+
+/* ================= CARGAR ABONOS ================= */
+function cargar(){
+
+    if(!pago_id.value) return;
+
+    fetch("/abonos/"+pago_id.value)
+    .then(r=>r.json())
+    .then(data=>{
+
+        tabla.innerHTML="";
+        let totalAbonado = 0;
+
+        data.forEach(a=>{
+
+            totalAbonado += Number(a.monto);
+
+            tabla.innerHTML+=`
+            <tr>
+                <td>${a.id}</td>
+                <td id="est-${a.id}">...</td>
+                <td>$${formatear(a.monto)}</td>
+                <td>${a.fecha ? new Date(a.fecha).toLocaleDateString() : ""}</td>
+                <td>
+                    <div class="acciones">
+                        <button class="btn eliminar" onclick="eliminar(${a.id})">🗑️</button>
+                    </div>
+                </td>
+            </tr>`;
+        });
+
+        cargarInfo(totalAbonado);
+        cargarNombreEstudiante();
+    });
+}
+
+/* ================= NOMBRE ESTUDIANTE ================= */
+function cargarNombreEstudiante(){
+
+    fetch("/pagos")
+    .then(r=>r.json())
+    .then(pagos=>{
+
+        const pago = pagos.find(p => p.id == pago_id.value);
+        if(!pago) return;
+
+        document.querySelectorAll("[id^='est-']").forEach(td=>{
+            td.innerText = pago.nombre + " " + pago.apellido;
+        });
+    });
+}
+
+/* ================= INFO ================= */
+function cargarInfo(totalAbonado){
+
+    fetch("/pagos")
+    .then(r=>r.json())
+    .then(data=>{
+
+        const pago = data.find(p => p.id == pago_id.value);
+        if(!pago) return;
+
+        const saldo = pago.total - totalAbonado;
+
+        infoPago.innerText =
+        "Total: $" + formatear(pago.total) +
+        " | Abonado: $" + formatear(totalAbonado) +
+        " | Saldo: $" + formatear(saldo);
+    });
+}
+
+/* ================= ELIMINAR ================= */
+function eliminar(id){
+    if(confirm("¿Eliminar abono?")){
+        fetch("/abonos/"+id,{method:"DELETE"})
+        .then(()=>cargar());
+    }
+}
+
+/* ================= VOLVER ================= */
+function volver(){
+    window.location.href="pagos.html";
+}
+
+/* ================= EVENTO ================= */
+pago_id.addEventListener("change", cargar);
+
+/* ================= INICIO ================= */
+window.onload = function(){
+    cargarPagos();
+};
+
+</script>
+
+</body>
+</html>

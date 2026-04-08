@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="style.css">
+
+<style>
+
+/* ===== FONDO ANIMADO ===== */
+body{
+    font-family: Arial, sans-serif;
+    margin:0;
+    min-height:100vh;
+    background: linear-gradient(-45deg, #007bff, #00c6ff, #0056b3, #00aaff);
+    background-size: 400% 400%;
+    animation: fondoAnimado 12s ease infinite;
+}
+
+@keyframes fondoAnimado{
+    0%{ background-position: 0% 50%; }
+    50%{ background-position: 100% 50%; }
+    100%{ background-position: 0% 50%; }
+}
+
+/* ===== CONTENEDOR (SE RESPETA TAMAÑO) ===== */
+.container{
+    max-width: 700px; /* compacto como pediste */
+    margin:40px auto;
+    padding:20px;
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(15px);
+    border-radius:20px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.25);
+    animation: aparecer 0.6s ease;
+}
+
+@keyframes aparecer{
+    from{
+        opacity:0;
+        transform: translateY(20px);
+    }
+    to{
+        opacity:1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== TITULO ===== */
+h2{
+    text-align:center;
+    color:white;
+    margin-bottom:15px;
+    font-size:24px;
+    text-shadow:0 5px 15px rgba(0,0,0,0.4);
+}
+
+/* ===== INPUTS ===== */
+input{
+    width:100%;
+    padding:10px;
+    margin-bottom:8px;
+    border-radius:10px;
+    border:none;
+    outline:none;
+    font-size:14px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+    transition:0.3s;
+}
+
+input:focus{
+    transform: scale(1.02);
+    box-shadow:0 0 10px rgba(0,123,255,0.5);
+}
+
+/* ===== BOTONES ===== */
+.btn{
+    padding:8px 15px;
+    border:none;
+    border-radius:25px;
+    cursor:pointer;
+    color:white;
+    margin:5px 3px;
+    transition: all 0.3s ease;
+    font-size:13px;
+    box-shadow:0 5px 10px rgba(0,0,0,0.2);
+}
+
+.guardar{ background:#007bff; }
+.inicio{ background:#0056b3; }
+.editar{ background:#007bff; }
+.eliminar{ background:#dc3545; }
+
+.btn:hover{
+    transform: translateY(-2px) scale(1.05);
+}
+
+/* ===== TABLA COMPACTA ===== */
+table{
+    width:100%;
+    margin-top:15px;
+    border-collapse: collapse;
+    border-radius:10px;
+    overflow:hidden;
+    background:white;
+    box-shadow:0 10px 20px rgba(0,0,0,0.2);
+}
+
+thead{
+    background:#007bff;
+    color:white;
+    font-size:13px;
+}
+
+td, th{
+    padding:8px;
+    text-align:center;
+    font-size:13px;
+}
+
+tbody tr{
+    border-bottom:1px solid #eee;
+    transition:0.2s;
+}
+
+tbody tr:hover{
+    background:#eaf4ff;
+}
+
+/* ===== BOTONES EN TABLA ===== */
+td .btn{
+    padding:6px 10px;
+    font-size:12px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:600px){
+    .container{
+        margin:10px;
+        padding:15px;
+    }
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="container">
+<h2>👨‍🏫 Profesores</h2>
+
+<input id="nombre" placeholder="Nombre">
+<input id="materia" placeholder="Materia">
+
+<button class="btn guardar" onclick="guardar()">Guardar</button>
+<button class="btn inicio" onclick="volver()">Inicio</button>
+
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Nombre</th>
+<th>Materia</th>
+<th>Acciones</th>
+</tr>
+</thead>
+<tbody id="tabla"></tbody>
+</table>
+
+</div>
+
+<script>
+let idEditar=null;
+
+function guardar(){
+    const datos={nombre:nombre.value,materia:materia.value};
+
+    if(idEditar){
+        fetch("/profesores/"+idEditar,{
+            method:"PUT",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify(datos)
+        }).then(()=>reset());
+    }else{
+        fetch("/profesores",{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify(datos)
+        }).then(()=>reset());
+    }
+}
+
+function cargar(){
+    fetch("/profesores")
+    .then(r=>r.json())
+    .then(data=>{
+        tabla.innerHTML="";
+        data.forEach(p=>{
+            tabla.innerHTML+=`
+            <tr>
+                <td>${p.id}</td>
+                <td>${p.nombre}</td>
+                <td>${p.materia}</td>
+                <td>
+                    <button class="btn editar" onclick="editar(${p.id},'${p.nombre}','${p.materia}')">Editar</button>
+                    <button class="btn eliminar" onclick="eliminar(${p.id})">Eliminar</button>
+                </td>
+            </tr>`;
+        });
+    });
+}
+
+function editar(id,n,m){
+    idEditar=id;
+    nombre.value=n;
+    materia.value=m;
+}
+
+function eliminar(id){
+    fetch("/profesores/"+id,{method:"DELETE"}).then(()=>cargar());
+}
+
+function reset(){
+    idEditar=null;
+    nombre.value="";
+    materia.value="";
+    cargar();
+}
+
+function volver(){
+    window.location.href="/";
+}
+
+cargar();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="style.css">
+
+<style>
+
+/* ===== FONDO ANIMADO PRO ===== */
+body{
+    font-family: Arial, sans-serif;
+    margin:0;
+    min-height:100vh;
+    background: linear-gradient(-45deg, #007bff, #00c6ff, #0056b3, #00aaff);
+    background-size: 400% 400%;
+    animation: fondoAnimado 12s ease infinite;
+}
+
+@keyframes fondoAnimado{
+    0%{ background-position: 0% 50%; }
+    50%{ background-position: 100% 50%; }
+    100%{ background-position: 0% 50%; }
+}
+
+/* ===== CONTENEDOR GLASS PREMIUM ===== */
+.container{
+    max-width: 900px;
+    margin:40px auto;
+    padding:25px;
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(15px);
+    border-radius:25px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.25);
+    animation: aparecer 0.8s ease;
+}
+
+@keyframes aparecer{
+    from{
+        opacity:0;
+        transform: translateY(20px);
+    }
+    to{
+        opacity:1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== BOTÓN PREMIUM ===== */
+.btn-inicio{
+    display:inline-block;
+    padding:12px 25px;
+    background:#007bff;
+    color:white;
+    text-decoration:none;
+    border-radius:50px;
+    margin-bottom:20px;
+    transition: all 0.3s ease;
+    box-shadow:0 8px 20px rgba(0,0,0,0.25);
+}
+
+.btn-inicio:hover{
+    background:#0056b3;
+    transform: translateY(-4px) scale(1.07);
+}
+
+/* ===== TITULO ===== */
+h2{
+    text-align:center;
+    color:white;
+    margin-bottom:25px;
+    font-size:28px;
+    text-shadow:0 5px 15px rgba(0,0,0,0.4);
+}
+
+/* ===== SELECT MODERNO ===== */
+select{
+    width:100%;
+    padding:14px;
+    margin-bottom:20px;
+    border-radius:12px;
+    border:none;
+    outline:none;
+    font-size:15px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.15);
+    transition:0.3s;
+}
+
+select:hover{
+    transform: scale(1.02);
+}
+
+/* ===== CARDS ULTRA PRO ===== */
+.card{
+    background:white;
+    padding:22px;
+    border-radius:18px;
+    margin-top:20px;
+    box-shadow:0 15px 35px rgba(0,0,0,0.2);
+    transition: all 0.4s ease;
+    position: relative;
+    overflow:hidden;
+}
+
+/* brillo animado continuo */
+.card::before{
+    content:"";
+    position:absolute;
+    top:-100%;
+    left:-100%;
+    width:300%;
+    height:300%;
+    background: linear-gradient(
+        120deg,
+        transparent,
+        rgba(255,255,255,0.4),
+        transparent
+    );
+    transform: rotate(25deg);
+    animation: brilloInfinito 6s linear infinite;
+}
+
+@keyframes brilloInfinito{
+    0%{ transform: translateX(-100%) rotate(25deg); }
+    100%{ transform: translateX(100%) rotate(25deg); }
+}
+
+.card:hover{
+    transform: translateY(-8px) scale(1.02);
+}
+
+/* ===== TABLAS ESTILO DASHBOARD ===== */
+table{
+    width:100%;
+    margin-top:10px;
+    border-collapse: collapse;
+    border-radius:12px;
+    overflow:hidden;
+}
+
+thead{
+    background:#007bff;
+    color:white;
+    font-size:14px;
+    letter-spacing:1px;
+}
+
+td, th{
+    padding:12px;
+    text-align:center;
+}
+
+tbody tr{
+    border-bottom:1px solid #eee;
+    transition: all 0.3s;
+}
+
+tbody tr:hover{
+    background:#eaf4ff;
+    transform: scale(1.02);
+}
+
+/* ===== EFECTO FILAS AL CARGAR ===== */
+tbody tr{
+    animation: fadeRow 0.5s ease;
+}
+
+@keyframes fadeRow{
+    from{
+        opacity:0;
+        transform: translateX(-10px);
+    }
+    to{
+        opacity:1;
+        transform: translateX(0);
+    }
+}
+
+/* ===== ESTADOS ===== */
+.deuda{
+    color:red;
+    font-weight:bold;
+}
+
+.pagado{
+    color:green;
+    font-weight:bold;
+}
+
+/* ===== PROMEDIO DESTACADO ===== */
+#promedio{
+    margin-top:15px;
+    text-align:right;
+    font-size:20px;
+    font-weight:bold;
+}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:600px){
+    .container{
+        margin:10px;
+        padding:15px;
+    }
+
+    td, th{
+        font-size:12px;
+    }
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+<!-- BOTÓN INICIO -->
+<a href="index.html" class="btn-inicio">🏠 Inicio</a>
+
+<h2>📊 Consulta de Estudiante</h2>
+
+<select id="estudiante_id" onchange="consultar()"></select>
+
+<!-- NOTAS -->
+<div class="card">
+    <h3>📝 Notas</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Materia</th>
+                <th>Nota</th>
+                <th>Fecha</th>
+            </tr>
+        </thead>
+        <tbody id="tablaNotas"></tbody>
+    </table>
+    <h4 id="promedio"></h4>
+</div>
+
+<!-- PAGOS -->
+<div class="card">
+    <h3>💰 Pagos / Deudas</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Total</th>
+                <th>Abono</th>
+                <th>Saldo</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody id="tablaPagos"></tbody>
+    </table>
+</div>
+
+</div>
+
+<script>
+
+/* ================= CARGAR ESTUDIANTES ================= */
+function cargarEstudiantes(){
+    fetch("/estudiantes")
+    .then(r=>r.json())
+    .then(data=>{
+        estudiante_id.innerHTML = "<option value=''>Seleccionar estudiante</option>";
+
+        data.forEach(e=>{
+            estudiante_id.innerHTML += `
+            <option value="${e.id}">
+                ${e.nombre} ${e.apellido}
+            </option>`;
+        });
+    });
+}
+
+/* ================= CONSULTAR ================= */
+function consultar(){
+
+    const id = estudiante_id.value;
+
+    if(!id){
+        tablaNotas.innerHTML="";
+        tablaPagos.innerHTML="";
+        promedio.innerText="";
+        return;
+    }
+
+    // 🔹 NOTAS
+    fetch("/notas")
+    .then(r=>r.json())
+    .then(data=>{
+        const notas = data.filter(n => n.estudiante_id == id);
+
+        tablaNotas.innerHTML="";
+        let suma = 0;
+
+        notas.forEach(n=>{
+            suma += Number(n.nota);
+
+            tablaNotas.innerHTML += `
+            <tr>
+                <td>${n.materia}</td>
+                <td>${n.nota}</td>
+                <td>${n.fecha ? new Date(n.fecha).toLocaleDateString() : ""}</td>
+            </tr>`;
+        });
+
+        if(notas.length > 0){
+            const prom = (suma / notas.length).toFixed(2);
+            promedio.innerText = "📊 Promedio: " + prom;
+        }else{
+            promedio.innerText = "Sin notas";
+        }
+    });
+
+    // 🔹 PAGOS
+    fetch("/pagos")
+    .then(r=>r.json())
+    .then(data=>{
+        const pagos = data.filter(p => p.estudiante_id == id);
+
+        tablaPagos.innerHTML="";
+
+        pagos.forEach(p=>{
+
+            const estado = p.saldo == 0
+                ? "<span class='pagado'>✔ Pagado</span>"
+                : "<span class='deuda'>❌ Deuda</span>";
+
+            tablaPagos.innerHTML += `
+            <tr>
+                <td>$${Number(p.total).toLocaleString()}</td>
+                <td>$${Number(p.abono).toLocaleString()}</td>
+                <td>$${Number(p.saldo).toLocaleString()}</td>
+                <td>${p.fecha ? new Date(p.fecha).toLocaleDateString() : ""}</td>
+                <td>${estado}</td>
+            </tr>`;
+        });
+    });
+}
+
+/* ================= INICIO ================= */
+window.onload = function(){
+    cargarEstudiantes();
+};
+
+</script>
+
+</body>
+</html>

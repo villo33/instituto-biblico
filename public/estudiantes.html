@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="style.css">
+
+<style>
+
+/* ===== FONDO ANIMADO ===== */
+body{
+    font-family: Arial, sans-serif;
+    margin:0;
+    min-height:100vh;
+    background: linear-gradient(-45deg, #007bff, #00c6ff, #0056b3, #00aaff);
+    background-size: 400% 400%;
+    animation: fondoAnimado 12s ease infinite;
+}
+
+@keyframes fondoAnimado{
+    0%{ background-position: 0% 50%; }
+    50%{ background-position: 100% 50%; }
+    100%{ background-position: 0% 50%; }
+}
+
+/* ===== CONTENEDOR ===== */
+.container{
+    max-width: 1000px;
+    margin:40px auto;
+    padding:25px;
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(15px);
+    border-radius:25px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.25);
+    animation: aparecer 0.8s ease;
+}
+
+@keyframes aparecer{
+    from{
+        opacity:0;
+        transform: translateY(20px);
+    }
+    to{
+        opacity:1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== TITULO ===== */
+h2{
+    text-align:center;
+    color:white;
+    margin-bottom:25px;
+    font-size:28px;
+    text-shadow:0 5px 15px rgba(0,0,0,0.4);
+}
+
+/* ===== INPUTS ===== */
+input, select{
+    width:100%;
+    padding:12px;
+    margin-bottom:10px;
+    border-radius:10px;
+    border:none;
+    outline:none;
+    font-size:14px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+    transition:0.3s;
+}
+
+input:focus, select:focus{
+    transform: scale(1.02);
+    box-shadow:0 0 10px rgba(0,123,255,0.5);
+}
+
+/* ===== BOTONES ===== */
+.btn{
+    padding:10px 18px;
+    border:none;
+    border-radius:30px;
+    cursor:pointer;
+    margin:5px 3px;
+    color:white;
+    transition: all 0.3s ease;
+    box-shadow:0 5px 15px rgba(0,0,0,0.2);
+}
+
+.guardar{ background:#007bff; }
+.inicio{ background:#0056b3; }
+.editar{ background:#007bff; }
+.eliminar{ background:#dc3545; }
+
+.btn:hover{
+    transform: translateY(-3px) scale(1.05);
+}
+
+/* ===== TABLA ===== */
+table{
+    width:100%;
+    margin-top:20px;
+    border-collapse: collapse;
+    border-radius:12px;
+    overflow:hidden;
+    background:white;
+    box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+
+thead{
+    background:#007bff;
+    color:white;
+    letter-spacing:1px;
+}
+
+td, th{
+    padding:12px;
+    text-align:center;
+}
+
+tbody tr{
+    border-bottom:1px solid #eee;
+    transition: all 0.3s;
+}
+
+tbody tr:hover{
+    background:#eaf4ff;
+    transform: scale(1.01);
+}
+
+/* ===== FILAS ANIMADAS ===== */
+tbody tr{
+    animation: fadeRow 0.4s ease;
+}
+
+@keyframes fadeRow{
+    from{
+        opacity:0;
+        transform: translateY(10px);
+    }
+    to{
+        opacity:1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== ACCIONES ===== */
+.acciones {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:600px){
+    .container{
+        margin:10px;
+        padding:15px;
+    }
+
+    td, th{
+        font-size:12px;
+    }
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="container">
+<h2>📚 Gestión de Estudiantes</h2>
+
+<input id="nombre" placeholder="Nombre">
+<input id="apellido" placeholder="Apellido">
+<input id="documento" placeholder="Documento">
+<input id="telefono" placeholder="Teléfono">
+
+<select id="semestre_id"></select>
+
+<button class="btn guardar" onclick="guardar()">Guardar</button>
+<button class="btn inicio" onclick="volver()">Inicio</button>
+
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Nombre</th>
+<th>Documento</th>
+<th>Teléfono</th>
+<th>Semestre</th>
+<th>Acciones</th>
+</tr>
+</thead>
+<tbody id="tabla"></tbody>
+</table>
+
+</div>
+
+<script>
+let idEditar = null;
+
+/* ================= GUARDAR ================= */
+function guardar() {
+
+    const datos = {
+        nombre: nombre.value,
+        apellido: apellido.value,
+        documento: documento.value,
+        telefono: telefono.value,
+        semestre_id: semestre_id.value
+    };
+
+    if(!datos.nombre || !datos.apellido || !datos.semestre_id){
+        alert("⚠️ Completa los campos");
+        return;
+    }
+
+    const url = idEditar ? "/estudiantes/" + idEditar : "/estudiantes";
+    const metodo = idEditar ? "PUT" : "POST";
+
+    fetch(url, {
+        method: metodo,
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify(datos)
+    })
+    .then(r => r.json())
+    .then(() => reset())
+    .catch(()=> alert("Error al guardar"));
+}
+
+/* ================= CARGAR ================= */
+function cargar() {
+    fetch("/estudiantes")
+    .then(r=>r.json())
+    .then(data=>{
+        tabla.innerHTML="";
+
+        data.forEach(e=>{
+
+            const semestreTexto = e.semestre ? e.semestre : "Sin asignar";
+
+            tabla.innerHTML += `
+            <tr>
+                <td>${e.id}</td>
+                <td>${e.nombre} ${e.apellido}</td>
+                <td>${e.documento || ""}</td>
+                <td>${e.telefono || ""}</td>
+                <td><b>${semestreTexto}</b></td>
+                <td>
+    <div class="acciones">
+        <button class="btn editar" onclick="editar(${e.id},'${e.nombre}','${e.apellido}','${e.documento}','${e.telefono}',${e.semestre_id})">✏️</button>
+        <button class="btn eliminar" onclick="eliminar(${e.id})">🗑️</button>
+        <button class="btn guardar" onclick="verPDF(${e.id})">📄</button>
+    </div>
+</td>
+            </tr>`;
+        });
+
+    })
+    .catch(()=> alert("Error cargando datos"));
+}
+
+/* ================= EDITAR ================= */
+function editar(id,n,a,d,t,s){
+    idEditar = id;
+    nombre.value = n;
+    apellido.value = a;
+    documento.value = d || "";
+    telefono.value = t || "";
+    semestre_id.value = s || "";
+}
+
+/* ================= ELIMINAR ================= */
+function eliminar(id){
+    if(confirm("¿Eliminar este estudiante?")){
+        fetch("/estudiantes/"+id,{method:"DELETE"})
+        .then(r=>r.json())
+        .then(()=>cargar())
+        .catch(()=>alert("Error al eliminar"));
+    }
+}
+
+/* ================= RESET ================= */
+function reset(){
+    idEditar=null;
+    nombre.value="";
+    apellido.value="";
+    documento.value="";
+    telefono.value="";
+    semestre_id.value="";
+    cargar();
+}
+
+/* ================= CARGAR SEMESTRES (LIMITADO 1-6) ================= */
+function cargarSemestres(){
+    fetch("/semestres")
+    .then(r=>r.json())
+    .then(data=>{
+
+        semestre_id.innerHTML = "<option value=''>Seleccionar semestre</option>";
+
+        const usados = new Set();
+
+data.forEach(s=>{
+
+    // 🔥 SOLO permitir semestres del 1 al 6 por nombre
+    const numero = parseInt(s.nombre.replace(/\D/g,''));
+
+    if(numero >= 1 && numero <= 6 && !usados.has(numero)){
+        usados.add(numero);
+
+        const option = document.createElement("option");
+        option.value = s.id;
+        option.textContent = "Semestre " + numero;
+        semestre_id.appendChild(option);
+    }
+
+});
+
+    })
+    .catch(()=> alert("Error cargando semestres"));
+}
+
+/* ================= VOLVER ================= */
+function volver(){
+    window.location.href="/";
+}
+function verPDF(id){
+    window.open("/reporte-estudiante/" + id, "_blank");
+}
+/* ================= INICIO ================= */
+window.onload = function(){
+    cargar();
+    cargarSemestres();
+};
+</script>
+
+</body>
+</html>
