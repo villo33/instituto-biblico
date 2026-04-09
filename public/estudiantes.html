@@ -287,35 +287,39 @@ function reset(){
     semestre_id.value="";
     cargar();
 }
-
-/* ================= CARGAR SEMESTRES (LIMITADO 1-6) ================= */
+/* ================= CARGAR SEMESTRES (1 AL 6 SIN REPETIR) ================= */
 function cargarSemestres(){
     fetch("/semestres")
-    .then(r=>r.json())
-    .then(data=>{
+    .then(r => r.json())
+    .then(data => {
 
         semestre_id.innerHTML = "<option value=''>Seleccionar semestre</option>";
 
         const usados = new Set();
 
-data.forEach(s=>{
+        data.forEach(s => {
 
-    // 🔥 SOLO permitir semestres del 1 al 6 por nombre
-    const numero = parseInt(s.nombre.replace(/\D/g,''));
+            // Extrae número del nombre (ej: "Semestre 3" → 3)
+            const match = s.nombre.match(/\d+/);
 
-    if(numero >= 1 && numero <= 6 && !usados.has(numero)){
-        usados.add(numero);
+            if(match){
+                const numero = parseInt(match[0]);
 
-        const option = document.createElement("option");
-        option.value = s.id;
-        option.textContent = "Semestre " + numero;
-        semestre_id.appendChild(option);
-    }
+                if(numero >= 1 && numero <= 6 && !usados.has(numero)){
+                    usados.add(numero);
 
-});
+                    const option = document.createElement("option");
+                    option.value = s.id;
+                    option.textContent = "Semestre " + numero;
+
+                    semestre_id.appendChild(option);
+                }
+            }
+
+        });
 
     })
-    .catch(()=> alert("Error cargando semestres"));
+    .catch(() => alert("Error cargando semestres"));
 }
 
 /* ================= VOLVER ================= */
