@@ -75,28 +75,33 @@
 </div>
 
 <script>
+
 function login(){
 
-    const datos = {
-        usuario: usuario.value,
-        password: password.value
-    };
+    const usuario = document.getElementById("usuario").value;
+    const password = document.getElementById("password").value;
 
     fetch("/login", {
         method:"POST",
         headers: {"Content-Type":"application/json"},
-        body: JSON.stringify(datos)
+        body: JSON.stringify({usuario, password})
     })
     .then(r=>r.json())
-    .then(res=>{
-        if(res.ok){
-            alert("Bienvenido");
-            window.location.href = "/index.html";
+    .then(data=>{
+
+        if(data.ok){
+            // 🔥 GUARDAR SESIÓN
+            localStorage.setItem("logueado", "true");
+
+            // ENTRAR AL SISTEMA
+            window.location.href = "/";
         }else{
-            alert("Datos incorrectos");
+            alert("❌ Usuario o contraseña incorrectos");
         }
+
     });
 }
+
 </script>
 
 </body>

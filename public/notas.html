@@ -397,6 +397,10 @@ window.onload = function(){
     cargar();
     cargarEstudiantes();
 };
+// 🔒 PROTECCIÓN
+if(localStorage.getItem("logueado") !== "true"){
+    window.location.href = "/login.html";
+}
 </script>
 
 </body>

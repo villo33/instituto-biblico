@@ -334,6 +334,12 @@ window.onload = function(){
     cargar();
     cargarSemestres();
 };
+
+
+// 🔒 PROTECCIÓN
+if(localStorage.getItem("logueado") !== "true"){
+    window.location.href = "/login.html";
+}
 </script>
 
 </body>

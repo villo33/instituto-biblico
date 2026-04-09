@@ -224,12 +224,16 @@ function reset(){
     materia.value="";
     cargar();
 }
-
 function volver(){
-    window.location.href="/";
+    window.location.href="/index.html";
 }
 
+
 cargar();
+// 🔒 PROTECCIÓN
+if(localStorage.getItem("logueado") !== "true"){
+    window.location.href = "/login.html";
+}
 </script>
 
 </body>

@@ -285,14 +285,19 @@ function cargarEstudiantes(){
 
 /* ================= VOLVER ================= */
 function volver(){
-    window.location.href="index.html";
+    window.location.href="/index.html";
 }
+
 
 /* ================= INICIO ================= */
 window.onload = function(){
     cargar();
     cargarEstudiantes();
 };
+// 🔒 PROTECCIÓN
+if(localStorage.getItem("logueado") !== "true"){
+    window.location.href = "/login.html";
+}
 </script>
 
 </body>
