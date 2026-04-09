@@ -407,6 +407,26 @@ app.delete("/abonos/:id", (req, res) => {
         });
     });
 });
+app.post("/login", (req, res) => {
+    const { usuario, password } = req.body;
+
+    db.query(
+        "SELECT * FROM usuarios WHERE usuario = ? AND password = ?",
+        [usuario, password],
+        (err, result) => {
+            if(err){
+                console.log(err);
+                return res.json({ ok:false });
+            }
+
+            if(result.length > 0){
+                res.json({ ok:true });
+            } else {
+                res.json({ ok:false });
+            }
+        }
+    );
+});
 /* ================= PDF ESTUDIANTE PRO ================= */
 
 function formatoCOP(num){
