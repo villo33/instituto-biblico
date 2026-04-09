@@ -75,7 +75,6 @@
 </div>
 
 <script>
-
 function login(){
 
     const usuario = document.getElementById("usuario").value;
@@ -90,18 +89,18 @@ function login(){
     .then(data=>{
 
         if(data.ok){
-            // 🔥 GUARDAR SESIÓN
             localStorage.setItem("logueado", "true");
 
-            // ENTRAR AL SISTEMA
-            window.location.href = "/";
+            // 🔥 AQUÍ ESTÁ EL FIX
+            window.location.href = "/index.html";
+
         }else{
             alert("❌ Usuario o contraseña incorrectos");
         }
 
-    });
+    })
+    .catch(()=> alert("Error en login"));
 }
-
 </script>
 
 </body>
