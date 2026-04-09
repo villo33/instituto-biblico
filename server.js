@@ -598,6 +598,10 @@ app.get("/reporte-estudiante/:id", (req, res) => {
         });
     });
 });
+// 🔥 REDIRIGIR AL LOGIN
+app.get("/", (req, res) => {
+    res.redirect("/login.html");
+});
     
 /* ================= SERVER ================= */
 const PORT = process.env.PORT || 3000;
