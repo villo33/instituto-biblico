@@ -7,6 +7,13 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+// 🔥 PRIMERO
+app.get("/", (req, res) => {
+    res.redirect("/login.html");
+});
+
+// 🔥 DESPUÉS
 app.use(express.static("public"));
 
 
