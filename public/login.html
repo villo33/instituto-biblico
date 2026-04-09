@@ -2,66 +2,95 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Login</title>
+<title>iniciar sesion </title>
 
 <style>
     body {
         margin: 0;
-        font-family: Arial, sans-serif;
-        background: linear-gradient(135deg, #4facfe, #00f2fe);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #1e3c72, #2a5298, #6dd5ed);
+        background-size: 300% 300%;
+        animation: gradientMove 10s ease infinite;
         height: 100vh;
         display: flex;
         justify-content: center;
         align-items: center;
     }
 
+    @keyframes gradientMove {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
     .login-container {
-        background: white;
+        backdrop-filter: blur(15px);
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
         padding: 40px;
-        border-radius: 15px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        width: 300px;
+        width: 320px;
         text-align: center;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        border: 1px solid rgba(255,255,255,0.2);
+        animation: fadeIn 1s ease;
+    }
+
+    @keyframes fadeIn {
+        from {opacity: 0; transform: translateY(20px);}
+        to {opacity: 1; transform: translateY(0);}
     }
 
     h2 {
-        margin-bottom: 20px;
-        color: #333;
+        margin-bottom: 25px;
+        color: white;
+        letter-spacing: 1px;
     }
 
     input {
         width: 100%;
         padding: 12px;
-        margin: 10px 0;
+        margin: 12px 0;
         border: none;
-        border-radius: 8px;
-        background: #f1f1f1;
+        border-radius: 10px;
+        background: rgba(255,255,255,0.2);
+        color: white;
         font-size: 14px;
+        transition: 0.3s;
+    }
+
+    input::placeholder {
+        color: rgba(255,255,255,0.7);
     }
 
     input:focus {
         outline: none;
-        background: #e0e0e0;
+        background: rgba(255,255,255,0.3);
+        box-shadow: 0 0 10px #6dd5ed;
     }
 
     button {
         width: 100%;
         padding: 12px;
-        margin-top: 15px;
+        margin-top: 20px;
         border: none;
-        border-radius: 8px;
-        background: #4facfe;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #00f2fe, #4facfe);
         color: white;
         font-size: 16px;
         cursor: pointer;
         transition: 0.3s;
+        box-shadow: 0 0 10px rgba(0,242,254,0.6);
     }
 
     button:hover {
-        background: #00c6ff;
+        transform: scale(1.05);
+        box-shadow: 0 0 20px rgba(0,242,254,1);
+    }
+
+    button:active {
+        transform: scale(0.98);
     }
 </style>
-
 </head>
 <body>
 
