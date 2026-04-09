@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title> Misión Celestial</title>
 <link rel="stylesheet" href="style.css">
-<button onclick="logout()">Cerrar sesión</button>
+
 <style>
     
 body {
@@ -20,6 +20,29 @@ body {
     0%{ background-position: 0% 50%; }
     50%{ background-position: 100% 50%; }
     100%{ background-position: 0% 50%; }
+}
+
+/* 🔥 BOTÓN CERRAR SESIÓN PRO */
+.logout{
+    position: fixed;
+    top: 15px;
+    right: 20px;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 14px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.logout:hover{
+    transform: scale(1.08);
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
 }
 
 /* CONTENEDOR */
@@ -40,11 +63,11 @@ body {
     }
 }
 
-/* TÍTULO 🔥 CORREGIDO */
+/* TÍTULO */
 h2 {
     font-size: 28px;
     margin-bottom: 5px;
-    color: #0c4a6e; /* antes blanco */
+    color: #0c4a6e;
     background: rgba(255,255,255,0.8);
     display: inline-block;
     padding: 10px 20px;
@@ -123,6 +146,9 @@ h2 {
 </head>
 <body>
 
+<!-- 🔥 BOTÓN NUEVO -->
+<button class="logout" onclick="logout()">⏻ Cerrar sesión</button>
+
 <div class="container">
 
     <h2>📖 Instituto Biblico Misión Celestial</h2>
@@ -173,6 +199,7 @@ h2 {
     </div>
 
 </div>
+
 <script>
 function logout(){
     localStorage.removeItem("logueado");
