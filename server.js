@@ -358,41 +358,57 @@ app.delete("/pagos/:id", async (req, res) => {
     }
 });
 
-
 /* ================= ABONOS ================= */
 
 app.post("/abonos", async (req, res) => {
     try {
-        const { pago_id, monto, fecha } = req.body;
+        let { pago_id, monto, fecha } = req.body;
 
+        // 🔥 Validaciones
+        if (!pago_id || !monto) {
+            return res.json({ mensaje: "⚠️ Datos incompletos" });
+        }
+
+        monto = Number(monto);
+
+        if (isNaN(monto) || monto <= 0) {
+            return res.json({ mensaje: "⚠️ Monto inválido" });
+        }
+
+        // 🔥 Obtener saldo actual
         const pago = await db.query(
             "SELECT saldo FROM pagos WHERE id=?",
             [pago_id]
         );
 
-        if (!pago.length) {
-            return res.json({ mensaje: "No existe pago" });
+        if (!pago || pago.length === 0) {
+            return res.json({ mensaje: "❌ No existe pago" });
         }
 
-        if (monto > pago[0].saldo) {
-            return res.json({ mensaje: "Supera saldo" });
+        const saldoActual = Number(pago[0].saldo);
+
+        // 🔥 Validar que no supere el saldo
+        if (monto > saldoActual) {
+            return res.json({ mensaje: "❌ El abono supera el saldo" });
         }
 
+        // 🔥 Insertar abono
         await db.query(
             "INSERT INTO abonos (pago_id, monto, fecha) VALUES (?, ?, ?)",
             [pago_id, monto, fecha || new Date()]
         );
 
+        // 🔥 Actualizar saldo
         await db.query(
             "UPDATE pagos SET saldo = saldo - ? WHERE id=?",
             [monto, pago_id]
         );
 
-        res.json({ mensaje: "Abono ok" });
+        res.json({ mensaje: "💵 Abono registrado correctamente" });
 
     } catch (err) {
-        console.log(err);
-        res.json({ mensaje: "Error" });
+        console.log("❌ ERROR ABONO:", err);
+        res.json({ mensaje: "❌ Error en servidor" });
     }
 });
 
