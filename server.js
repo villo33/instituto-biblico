@@ -415,22 +415,31 @@ app.delete("/abonos/:id", (req, res) => {
     });
 });
 app.post("/login", async (req, res) => {
-    const { usuario, password } = req.body;
+    let { usuario, password } = req.body;
+
+    // 🔥 LIMPIAR DATOS (CLAVE)
+    usuario = usuario?.trim();
+    password = password?.trim();
+
+    console.log("👉 Usuario:", usuario);
+    console.log("👉 Password:", password);
 
     try {
         const result = await db.query(
-            "SELECT * FROM usuarios WHERE usuario = $1 AND password = $2",
+            "SELECT * FROM usuarios WHERE TRIM(usuario) = $1 AND TRIM(password) = $2",
             [usuario, password]
         );
 
+        console.log("👉 RESULTADO:", result.rows);
+
         if (result.rows.length > 0) {
-            res.json({ ok: true });
+            return res.json({ ok: true });
         } else {
-            res.json({ ok: false });
+            return res.json({ ok: false });
         }
 
     } catch (err) {
-        console.log(err);
+        console.log("❌ ERROR:", err);
         res.json({ ok: false });
     }
 });
