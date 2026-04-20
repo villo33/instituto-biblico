@@ -411,6 +411,22 @@ app.post("/abonos", async (req, res) => {
         res.json({ mensaje: "❌ Error en servidor" });
     }
 });
+/* ================= GET ABONOS ================= */
+
+app.get("/abonos/:pago_id", async (req, res) => {
+    try {
+        const data = await db.query(
+            "SELECT * FROM abonos WHERE pago_id=? ORDER BY id DESC",
+            [req.params.pago_id]
+        );
+
+        res.json(data);
+
+    } catch (err) {
+        console.log(err);
+        res.json([]);
+    }
+});
 
 
 /* ================= LOGIN ================= */
