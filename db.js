@@ -1,22 +1,14 @@
 const { Pool } = require("pg");
 
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL, // 🔥 Supabase
-    ssl: {
-        rejectUnauthorized: false
-    }
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
 });
 
-pool.connect((err) => {
-    if (err) {
-        console.log("❌ Error de conexión:");
-        console.log(err);
-        return;
-    }
-    console.log("✅ Conectado a Supabase PostgreSQL");
-});
+pool.connect()
+    .then(() => console.log("✅ Conectado a Supabase PostgreSQL"))
+    .catch(err => console.log("❌ Error conexión", err));
 
-/* 🔥 ADAPTADOR PARA QUE TU SERVER NO CAMBIE */
 function convertirQuery(sql, params = []) {
     let index = 0;
 
@@ -29,15 +21,19 @@ function convertirQuery(sql, params = []) {
 }
 
 module.exports = {
-    query: async (sql, params, callback) => {
+    query: async (sql, params = [], callback) => {
         try {
             const { text, values } = convertirQuery(sql, params);
 
             const result = await pool.query(text, values);
 
-            // 🔥 Simular MySQL
-            const data = result.rows;
-            data.affectedRows = result.rowCount;
+            // 🔥 VALIDACIÓN CLAVE
+            if (!result) {
+                throw new Error("Query no devolvió resultado");
+            }
+
+            const data = result.rows || [];
+            data.affectedRows = result.rowCount || 0;
 
             if (callback) {
                 callback(null, data);
@@ -51,7 +47,7 @@ module.exports = {
             if (callback) {
                 callback(err, null);
             } else {
-                throw err;
+                return []; // 🔥 evita que tumbe el server
             }
         }
     }
