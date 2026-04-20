@@ -484,6 +484,8 @@ app.post("/login", async (req, res) => {
         res.json({ ok: false });
     }
 });
+const path = require("path");
+
 app.get("/reporte-estudiante/:id", async (req, res) => {
     try {
         const id = req.params.id;
@@ -514,33 +516,95 @@ app.get("/reporte-estudiante/:id", async (req, res) => {
             ORDER BY a.id DESC
         `, [id]);
 
-        const doc = new PDFDocument({ margin: 60 });
+        const doc = new PDFDocument({ margin: 50 });
 
         res.setHeader("Content-Type", "application/pdf");
         res.setHeader("Content-Disposition", `inline; filename=reporte_${est.nombre}.pdf`);
 
         doc.pipe(res);
 
-        doc.fontSize(16).text("Instituto Bíblico", { align: "center" });
-        doc.moveDown();
+        // 🔥 LOGO IZQUIERDA
+        doc.image(
+            path.join(__dirname, "public", "logo.jpg"),
+            50,
+            40,
+            { width: 60 }
+        );
 
+        // 🔥 TITULO DERECHA
+        doc
+            .font("Helvetica-Bold")
+            .fontSize(18)
+            .text("INSTITUTO BÍBLICO", 130, 50);
+
+        doc
+            .font("Helvetica")
+            .fontSize(10)
+            .text("Reporte Académico y Financiero", 130, 70);
+
+        // 🔥 LINEA SEPARADORA
+        doc.moveTo(50, 110).lineTo(550, 110).stroke();
+
+        doc.moveDown(4);
+
+        // 🔥 DATOS ESTUDIANTE
+        doc.font("Helvetica-Bold").fontSize(12).text("DATOS DEL ESTUDIANTE");
+        doc.moveDown(0.5);
+
+        doc.font("Helvetica").fontSize(11);
         doc.text(`Nombre: ${est.nombre} ${est.apellido}`);
         doc.text(`Documento: ${est.documento}`);
         doc.text(`Semestre: ${est.semestre || "N/A"}`);
 
         doc.moveDown();
-        doc.text("Notas:");
 
-        notas.forEach(n => {
-            doc.text(`${n.materia} - ${n.nota}`);
-        });
+        // 🔥 LINEA
+        doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
 
         doc.moveDown();
-        doc.text("Pagos:");
 
-        abonos.forEach(a => {
-            doc.text(`$${a.monto} - saldo: $${a.saldo}`);
-        });
+        // 🔥 NOTAS
+        doc.font("Helvetica-Bold").fontSize(12).text("NOTAS");
+        doc.moveDown(0.5);
+
+        if (notas.length === 0) {
+            doc.font("Helvetica").text("No hay notas registradas");
+        } else {
+            notas.forEach(n => {
+                doc.font("Helvetica").fontSize(11)
+                   .text(`• ${n.materia}: ${n.nota}`);
+            });
+        }
+
+        doc.moveDown();
+
+        // 🔥 LINEA
+        doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+
+        doc.moveDown();
+
+        // 🔥 ABONOS
+        doc.font("Helvetica-Bold").fontSize(12).text("ABONOS");
+        doc.moveDown(0.5);
+
+        if (abonos.length === 0) {
+            doc.font("Helvetica").text("No hay abonos registrados");
+        } else {
+            abonos.forEach(a => {
+                doc.font("Helvetica").fontSize(11)
+                   .text(`• $${a.monto}  |  Saldo restante: $${a.saldo}`);
+            });
+        }
+
+        doc.moveDown(2);
+
+        // 🔥 FOOTER
+        doc
+            .fontSize(9)
+            .fillColor("gray")
+            .text("Sistema académico - Instituto Bíblico", {
+                align: "center"
+            });
 
         doc.end();
 
