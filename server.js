@@ -484,6 +484,71 @@ app.post("/login", async (req, res) => {
         res.json({ ok: false });
     }
 });
+app.get("/reporte-estudiante/:id", async (req, res) => {
+    try {
+        const id = req.params.id;
+
+        const estudiante = await db.query(`
+            SELECT e.*, s.nombre AS semestre
+            FROM estudiantes e
+            LEFT JOIN semestres s ON e.semestre_id = s.id
+            WHERE e.id=?
+        `, [id]);
+
+        if (!estudiante.length) {
+            return res.send("No existe estudiante");
+        }
+
+        const est = estudiante[0];
+
+        const notas = await db.query(
+            "SELECT * FROM notas WHERE estudiante_id=?",
+            [id]
+        );
+
+        const abonos = await db.query(`
+            SELECT a.*, p.total, p.saldo
+            FROM abonos a
+            JOIN pagos p ON a.pago_id = p.id
+            WHERE p.estudiante_id=?
+            ORDER BY a.id DESC
+        `, [id]);
+
+        const doc = new PDFDocument({ margin: 60 });
+
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader("Content-Disposition", `inline; filename=reporte_${est.nombre}.pdf`);
+
+        doc.pipe(res);
+
+        doc.fontSize(16).text("Instituto Bíblico", { align: "center" });
+        doc.moveDown();
+
+        doc.text(`Nombre: ${est.nombre} ${est.apellido}`);
+        doc.text(`Documento: ${est.documento}`);
+        doc.text(`Semestre: ${est.semestre || "N/A"}`);
+
+        doc.moveDown();
+        doc.text("Notas:");
+
+        notas.forEach(n => {
+            doc.text(`${n.materia} - ${n.nota}`);
+        });
+
+        doc.moveDown();
+        doc.text("Pagos:");
+
+        abonos.forEach(a => {
+            doc.text(`$${a.monto} - saldo: $${a.saldo}`);
+        });
+
+        doc.end();
+
+    } catch (err) {
+        console.log(err);
+        res.send("Error generando PDF");
+    }
+});
 
 // 🔥 REDIRIGIR AL LOGIN
 app.get("/", (req, res) => {
