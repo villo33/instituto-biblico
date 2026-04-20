@@ -427,6 +427,43 @@ app.get("/abonos/:pago_id", async (req, res) => {
         res.json([]);
     }
 });
+/* ================= DELETE ABONO ================= */
+
+app.delete("/abonos/:id", async (req, res) => {
+    try {
+        const id = req.params.id;
+
+        // 🔥 Buscar el abono
+        const result = await db.query(
+            "SELECT * FROM abonos WHERE id=?",
+            [id]
+        );
+
+        if (!result || result.length === 0) {
+            return res.json({ mensaje: "❌ No existe" });
+        }
+
+        const abono = result[0];
+
+        // 🔥 Devolver saldo al pago
+        await db.query(
+            "UPDATE pagos SET saldo = saldo + ? WHERE id=?",
+            [abono.monto, abono.pago_id]
+        );
+
+        // 🔥 Eliminar abono
+        await db.query(
+            "DELETE FROM abonos WHERE id=?",
+            [id]
+        );
+
+        res.json({ mensaje: "🗑️ Abono eliminado correctamente" });
+
+    } catch (err) {
+        console.log(err);
+        res.json({ mensaje: "❌ Error eliminando" });
+    }
+});
 
 
 /* ================= LOGIN ================= */
