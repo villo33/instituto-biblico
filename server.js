@@ -414,25 +414,25 @@ app.delete("/abonos/:id", (req, res) => {
         });
     });
 });
-app.post("/login", (req, res) => {
+app.post("/login", async (req, res) => {
     const { usuario, password } = req.body;
 
-    db.query(
-        "SELECT * FROM usuarios WHERE usuario = ? AND password = ?",
-        [usuario, password],
-        (err, result) => {
-            if(err){
-                console.log(err);
-                return res.json({ ok:false });
-            }
+    try {
+        const result = await db.query(
+            "SELECT * FROM usuarios WHERE usuario = $1 AND password = $2",
+            [usuario, password]
+        );
 
-            if(result.length > 0){
-                res.json({ ok:true });
-            } else {
-                res.json({ ok:false });
-            }
+        if (result.rows.length > 0) {
+            res.json({ ok: true });
+        } else {
+            res.json({ ok: false });
         }
-    );
+
+    } catch (err) {
+        console.log(err);
+        res.json({ ok: false });
+    }
 });
 /* ================= PDF ESTUDIANTE PRO ================= */
 
