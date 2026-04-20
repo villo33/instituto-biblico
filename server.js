@@ -605,7 +605,22 @@ app.get("/reporte-estudiante/:id", async (req, res) => {
             .text("Sistema académico - Instituto Bíblico", {
                 align: "center"
             });
+// Espacio antes de firma
+doc.moveDown(4);
 
+// Línea de firma
+const firmaY = doc.y;
+
+doc.moveTo(200, firmaY)
+   .lineTo(400, firmaY)
+   .stroke();
+
+// Texto debajo de la línea
+doc.moveDown(0.5);
+doc.fontSize(10).text("Firma autorizada", 200, doc.y, {
+    width: 200,
+    align: "center"
+});
         doc.end();
 
     } catch (err) {
