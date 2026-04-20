@@ -415,27 +415,24 @@ app.delete("/abonos/:id", (req, res) => {
     });
 });
 app.post("/login", async (req, res) => {
-    let { usuario, password } = req.body;
-
-    // 🔥 LIMPIAR DATOS (CLAVE)
-    usuario = usuario?.trim();
-    password = password?.trim();
+    const { usuario, password } = req.body;
 
     console.log("👉 Usuario:", usuario);
     console.log("👉 Password:", password);
 
     try {
         const result = await db.query(
-            "SELECT * FROM usuarios WHERE TRIM(usuario) = $1 AND TRIM(password) = $2",
+            "SELECT * FROM usuarios WHERE usuario = $1 AND password = $2",
             [usuario, password]
         );
 
-        console.log("👉 RESULTADO:", result.rows);
+        console.log("👉 RESULTADO:", result);
 
-        if (result.rows.length > 0) {
-            return res.json({ ok: true });
+        // 🔥 AQUÍ EL FIX REAL
+        if (result.length > 0) {
+            res.json({ ok: true });
         } else {
-            return res.json({ ok: false });
+            res.json({ ok: false });
         }
 
     } catch (err) {
@@ -443,6 +440,8 @@ app.post("/login", async (req, res) => {
         res.json({ ok: false });
     }
 });
+
+
 /* ================= PDF ESTUDIANTE PRO ================= */
 
 function formatoCOP(num){
