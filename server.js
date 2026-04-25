@@ -15,6 +15,10 @@ app.get("/", (req, res) => {
 
 // 🔥 DESPUÉS
 app.use(express.static("public"));
+// 🔥 REDIRIGIR AL LOGIN
+app.get("/", (req, res) => {
+    res.redirect("/login.html");
+});
 
 
 /* ================= SEMESTRES ================= */
@@ -569,97 +573,106 @@ app.get("/reporte-estudiante/:id", async (req, res) => {
 
         doc.moveDown();
 
-       // 🔥 NOTAS
+      // 🔥 NOTAS
 doc.font("Helvetica-Bold").fontSize(12).text("NOTAS");
 doc.moveDown(0.8);
 
-const col1 = 60;   // materia
-const col2 = 300;  // nota
-const col3 = 400;  // fecha
+const nCol1 = 60;
+const nCol2 = 300;
+const nCol3 = 420;
 
-// ENCABEZADOS
+let yNotas = doc.y;
+
+// encabezados
 doc.font("Helvetica-Bold").fontSize(11);
-doc.text("Materia", col1, doc.y);
-doc.text("Nota", col2, doc.y);
-doc.text("Fecha", col3, doc.y);
+doc.text("Materia", nCol1, yNotas);
+doc.text("Nota", nCol2, yNotas);
+doc.text("Fecha", nCol3, yNotas);
 
-doc.moveDown(0.3);
-doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
-doc.moveDown(0.5);
+yNotas += 15;
+doc.moveTo(50, yNotas).lineTo(550, yNotas).stroke();
+yNotas += 10;
+
+doc.font("Helvetica");
 
 if (notas.length === 0) {
-    doc.font("Helvetica").text("No hay notas registradas");
-} else 
+    doc.text("No hay notas registradas", nCol1, yNotas);
+    yNotas += 20;
+} else {
     notas.forEach(n => {
 
-    const fecha = n.fecha
-        ? new Date(n.fecha).toLocaleDateString("es-CO", {
-            timeZone: "America/Bogota"
-          })
-        : "Sin fecha";
+        const fecha = n.fecha
+            ? new Date(n.fecha).toLocaleDateString("es-CO", {
+                timeZone: "America/Bogota"
+              })
+            : "Sin fecha";
 
-    doc.font("Helvetica").fontSize(11);
+        doc.text(n.materia, nCol1, yNotas);
+        doc.text(String(n.nota), nCol2, yNotas);
+        doc.text(fecha, nCol3, yNotas);
 
-    doc.text(n.materia, col1, doc.y);
-    doc.text(String(n.nota), col2, doc.y);
-    doc.text(fecha, col3, doc.y);
+        yNotas += 20;
+    });
+}
 
-    doc.moveDown(0.5);
-});
-   
-        // 🔥 ABONOS
-        doc.font("Helvetica-Bold").fontSize(12).text("ABONOS");
-        doc.moveDown(0.5);
+doc.moveTo(50, yNotas).lineTo(550, yNotas).stroke();
+doc.y = yNotas + 20;
 
-        if (abonos.length === 0) {
-            doc.font("Helvetica").text("No hay abonos registrados");
-        } else {
-           abonos.forEach(a => {
-    const fecha = new Date(a.fecha).toLocaleDateString("es-CO");
 
-    doc.font("Helvetica").fontSize(11)
-       .text(`• $${a.monto}  |  Fecha: ${fecha}  |  Saldo: $${a.saldo}`);
-});
-        }
+// 🔥 ABONOS
+doc.font("Helvetica-Bold").fontSize(12).text("ABONOS");
+doc.moveDown(0.8);
 
-        doc.moveDown(2);
+const aCol1 = 60;
+const aCol2 = 220;
+const aCol3 = 380;
 
-        // 🔥 FOOTER
-        doc
-            .fontSize(9)
-            .fillColor("gray")
-            .text("Sistema académico - Instituto Bíblico", {
-                align: "center"
-            });
-// Espacio antes de firma
-doc.moveDown(4);
+let yAbonos = doc.y;
 
-// Línea de firma
-const firmaY = doc.y;
+// encabezados
+doc.font("Helvetica-Bold").fontSize(11);
+doc.text("Monto", aCol1, yAbonos);
+doc.text("Fecha", aCol2, yAbonos);
+doc.text("Saldo", aCol3, yAbonos);
 
-doc.moveTo(200, firmaY)
-   .lineTo(400, firmaY)
-   .stroke();
+yAbonos += 15;
+doc.moveTo(50, yAbonos).lineTo(550, yAbonos).stroke();
+yAbonos += 10;
 
-// Texto debajo de la línea
-doc.moveDown(0.5);
-doc.fontSize(10).text("Firma autorizada", 200, doc.y, {
-    width: 200,
-    align: "center"
-});
-        doc.end();
+doc.font("Helvetica");
 
-    } catch (err) {
-        console.log(err);
-        res.send("Error generando PDF");
-    }
-});
+if (abonos.length === 0) {
+    doc.text("No hay abonos registrados", aCol1, yAbonos);
+    yAbonos += 20;
+} else {
+    abonos.forEach(a => {
 
-// 🔥 REDIRIGIR AL LOGIN
-app.get("/", (req, res) => {
-    res.redirect("/login.html");
-});
-    
+        const fecha = a.fecha
+            ? new Date(a.fecha).toLocaleDateString("es-CO", {
+                timeZone: "America/Bogota"
+              })
+            : "Sin fecha";
+
+        doc.text(`$${a.monto}`, aCol1, yAbonos);
+        doc.text(fecha, aCol2, yAbonos);
+        doc.text(`$${a.saldo}`, aCol3, yAbonos);
+
+        yAbonos += 20;
+    });
+}
+
+doc.moveTo(50, yAbonos).lineTo(550, yAbonos).stroke();
+doc.y = yAbonos + 20;
+
+// 🔥 FINALIZAR PDF
+doc.end();
+
+} catch (err) {
+    console.log(err);
+    res.send("Error generando PDF");
+}
+}); // 👈 ESTE CIERRA app.get("/reporte-estudiante/:id")
+
 /* ================= SERVER ================= */
 const PORT = process.env.PORT || 3000;
 
