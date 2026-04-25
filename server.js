@@ -503,10 +503,16 @@ app.get("/reporte-estudiante/:id", async (req, res) => {
 
         const est = estudiante[0];
 
-        const notas = await db.query(
-            "SELECT * FROM notas WHERE estudiante_id=?",
-            [id]
-        );
+       const notas = await db.query(`
+    SELECT 
+        n.id,
+        n.materia,
+        n.nota,
+        n.fecha
+    FROM notas n
+    WHERE n.estudiante_id=?
+    ORDER BY n.fecha ASC
+`, [id]);
 
         const abonos = await db.query(`
             SELECT a.*, p.total, p.saldo
@@ -565,47 +571,43 @@ app.get("/reporte-estudiante/:id", async (req, res) => {
 
        // 🔥 NOTAS
 doc.font("Helvetica-Bold").fontSize(12).text("NOTAS");
-doc.moveDown(0.5);
+doc.moveDown(0.8);
 
-// 🔥 ENCABEZADO TABLA
-const startX = 50;
+const col1 = 60;   // materia
+const col2 = 300;  // nota
+const col3 = 400;  // fecha
 
-doc.font("Helvetica-Bold").fontSize(10);
+// ENCABEZADOS
+doc.font("Helvetica-Bold").fontSize(11);
+doc.text("Materia", col1, doc.y);
+doc.text("Nota", col2, doc.y);
+doc.text("Fecha", col3, doc.y);
 
-doc.text("Materia", startX, doc.y);
-doc.text("Nota", 250, doc.y);
-doc.text("Fecha", 320, doc.y);
-
-// Línea debajo del encabezado
 doc.moveDown(0.3);
 doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
-
 doc.moveDown(0.5);
 
 if (notas.length === 0) {
     doc.font("Helvetica").text("No hay notas registradas");
 } else {
-
     notas.forEach(n => {
-        const fecha = n.fecha 
-            ? new Date(n.fecha).toLocaleDateString("es-CO") 
+
+        const fecha = n.fecha
+            ? new Date(n.fecha).toLocaleDateString("es-CO")
             : "Sin fecha";
 
-        const y = doc.y;
+        doc.font("Helvetica").fontSize(11);
 
-        doc.font("Helvetica").fontSize(10);
-
-        doc.text(n.materia, startX, y);
-        doc.text(n.nota.toString(), 250, y);
-        doc.text(fecha, 320, y);
+        doc.text(n.materia, col1, doc.y);
+        doc.text(String(n.nota), col2, doc.y);
+        doc.text(fecha, col3, doc.y);
 
         doc.moveDown(0.5);
-
-        // Línea separadora suave
-        doc.moveTo(50, doc.y).lineTo(550, doc.y).opacity(0.2).stroke().opacity(1);
     });
 }
 
+doc.moveDown();
+doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
 doc.moveDown();
 
         // 🔥 ABONOS
