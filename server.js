@@ -570,10 +570,14 @@ app.get("/reporte-estudiante/:id", async (req, res) => {
         if (notas.length === 0) {
             doc.font("Helvetica").text("No hay notas registradas");
         } else {
-            notas.forEach(n => {
-                doc.font("Helvetica").fontSize(11)
-                   .text(`• ${n.materia}: ${n.nota}`);
-            });
+           notas.forEach(n => {
+    const fecha = n.fecha 
+        ? new Date(n.fecha).toLocaleDateString("es-CO") 
+        : "Sin fecha";
+
+    doc.font("Helvetica").fontSize(11)
+       .text(`• ${n.materia}: ${n.nota} | Fecha: ${fecha}`);
+});
         }
 
         doc.moveDown();
