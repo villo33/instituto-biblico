@@ -683,16 +683,16 @@ doc.lineWidth(0.5);
 doc.y = yAbonos + 30;
 
 
-// 🔥 FIRMA (como pediste)
-const firmaY = doc.y;
+// 🔥 FIRMA (ABAJO A LA DERECHA)
+const firmaY = doc.y + 40;
 
+// línea de firma
 doc.moveTo(350, firmaY)
    .lineTo(550, firmaY)
    .stroke();
 
-doc.moveDown(0.5);
-
-doc.fontSize(10).text("Firma autorizada", 350, doc.y, {
+// texto centrado debajo de la línea
+doc.fontSize(10).text("Firma autorizada", 350, firmaY + 5, {
     width: 200,
     align: "center"
 });
@@ -700,7 +700,6 @@ doc.fontSize(10).text("Firma autorizada", 350, doc.y, {
 
 // 🔥 FINALIZAR PDF
 doc.end();
-
 } catch (err) {
     console.log(err);
     res.send("Error generando PDF");
