@@ -1,48 +1,68 @@
-self.addEventListener("install", e => {
-  e.waitUntil(
-    caches.open("app-cache-v2").then(cache => {
-      return cache.addAll([
-        "/login.html",
-        "/index.html",
-        "/notas.html",
-        "/pagos.html",
-        "/abonos.html",
-        "/style.css",
-        "/logo.jpg"
-      ]);
+const CACHE_NAME = "app-cache-v1";
+
+const urlsToCache = [
+  "/login.html",
+  "/index.html",
+  "/style.css",
+  "/logo.jpg"
+];
+
+// 🔥 INSTALL: guardar archivos base
+self.addEventListener("install", event => {
+  self.skipWaiting();
+
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll(urlsToCache);
     })
   );
 });
 
-self.addEventListener("fetch", e => {
-  e.respondWith(
-    caches.match(e.request).then(res => res || fetch(e.request))
-  );
-});
-    
-
-// 🔥 ACTIVAR (limpia versiones viejas)
-self.addEventListener("activate", e => {
-  const cacheWhitelist = ["app-cache-v1"];
-
-  e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
+// 🔥 ACTIVATE: limpiar cachés viejos
+self.addEventListener("activate", event => {
+  event.waitUntil(
+    caches.keys().then(keys => {
+      return Promise.all(
         keys.map(key => {
-          if (!cacheWhitelist.includes(key)) {
+          if (key !== CACHE_NAME) {
             return caches.delete(key);
           }
         })
-      )
-    )
+      );
+    })
   );
+
+  self.clients.claim();
 });
 
-// 🔥 FETCH (para que funcione offline)
-self.addEventListener("fetch", e => {
-  e.respondWith(
-    caches.match(e.request).then(res => {
-      return res || fetch(e.request);
-    })
+// 🔥 FETCH: SIN errores de redirect en Render
+self.addEventListener("fetch", event => {
+  const request = event.request;
+
+  // Solo manejar GET (evita errores con POST/PUT)
+  if (request.method !== "GET") return;
+
+  event.respondWith(
+    fetch(request)
+      .then(response => {
+        // Guardar copia en cache SOLO si es válida
+        const responseClone = response.clone();
+
+        caches.open(CACHE_NAME).then(cache => {
+          cache.put(request, responseClone);
+        });
+
+        return response;
+      })
+      .catch(() => {
+        return caches.match(request).then(cacheRes => {
+          // fallback para navegación (PWA)
+          if (cacheRes) return cacheRes;
+
+          if (request.mode === "navigate") {
+            return caches.match("/login.html");
+          }
+        });
+      })
   );
 });
