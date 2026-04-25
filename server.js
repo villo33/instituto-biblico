@@ -563,29 +563,50 @@ app.get("/reporte-estudiante/:id", async (req, res) => {
 
         doc.moveDown();
 
-        // 🔥 NOTAS
-        doc.font("Helvetica-Bold").fontSize(12).text("NOTAS");
+       // 🔥 NOTAS
+doc.font("Helvetica-Bold").fontSize(12).text("NOTAS");
+doc.moveDown(0.5);
+
+// 🔥 ENCABEZADO TABLA
+const startX = 50;
+
+doc.font("Helvetica-Bold").fontSize(10);
+
+doc.text("Materia", startX, doc.y);
+doc.text("Nota", 250, doc.y);
+doc.text("Fecha", 320, doc.y);
+
+// Línea debajo del encabezado
+doc.moveDown(0.3);
+doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+
+doc.moveDown(0.5);
+
+if (notas.length === 0) {
+    doc.font("Helvetica").text("No hay notas registradas");
+} else {
+
+    notas.forEach(n => {
+        const fecha = n.fecha 
+            ? new Date(n.fecha).toLocaleDateString("es-CO") 
+            : "Sin fecha";
+
+        const y = doc.y;
+
+        doc.font("Helvetica").fontSize(10);
+
+        doc.text(n.materia, startX, y);
+        doc.text(n.nota.toString(), 250, y);
+        doc.text(fecha, 320, y);
+
         doc.moveDown(0.5);
 
-        if (notas.length === 0) {
-            doc.font("Helvetica").text("No hay notas registradas");
-        } else {
-           notas.forEach(n => {
-    const fecha = n.fecha 
-        ? new Date(n.fecha).toLocaleDateString("es-CO") 
-        : "Sin fecha";
+        // Línea separadora suave
+        doc.moveTo(50, doc.y).lineTo(550, doc.y).opacity(0.2).stroke().opacity(1);
+    });
+}
 
-    doc.font("Helvetica").fontSize(11)
-       .text(`• ${n.materia}: ${n.nota} | Fecha: ${fecha}`);
-});
-        }
-
-        doc.moveDown();
-
-        // 🔥 LINEA
-        doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
-
-        doc.moveDown();
+doc.moveDown();
 
         // 🔥 ABONOS
         doc.font("Helvetica-Bold").fontSize(12).text("ABONOS");
