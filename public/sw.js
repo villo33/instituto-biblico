@@ -7,7 +7,7 @@ const urlsToCache = [
   "/logo.jpg"
 ];
 
-// 🔥 INSTALL: guardar archivos base
+// INSTALL
 self.addEventListener("install", event => {
   self.skipWaiting();
 
@@ -18,34 +18,35 @@ self.addEventListener("install", event => {
   );
 });
 
-// 🔥 ACTIVATE: limpiar cachés viejos
+// ACTIVATE
 self.addEventListener("activate", event => {
   event.waitUntil(
-    caches.keys().then(keys => {
-      return Promise.all(
+    caches.keys().then(keys =>
+      Promise.all(
         keys.map(key => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
+          if (key !== CACHE_NAME) return caches.delete(key);
         })
-      );
-    })
+      )
+    )
   );
 
   self.clients.claim();
 });
 
-// 🔥 FETCH: SIN errores de redirect en Render
+// FETCH (CORREGIDO)
 self.addEventListener("fetch", event => {
   const request = event.request;
 
-  // Solo manejar GET (evita errores con POST/PUT)
   if (request.method !== "GET") return;
 
   event.respondWith(
     fetch(request)
       .then(response => {
-        // Guardar copia en cache SOLO si es válida
+        // 🔥 SOLO cachear respuestas válidas
+        if (!response || response.status !== 200 || response.type !== "basic") {
+          return response;
+        }
+
         const responseClone = response.clone();
 
         caches.open(CACHE_NAME).then(cache => {
@@ -56,7 +57,6 @@ self.addEventListener("fetch", event => {
       })
       .catch(() => {
         return caches.match(request).then(cacheRes => {
-          // fallback para navegación (PWA)
           if (cacheRes) return cacheRes;
 
           if (request.mode === "navigate") {
