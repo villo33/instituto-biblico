@@ -619,6 +619,11 @@ doc.moveTo(50, yNotas).lineTo(550, yNotas).stroke();
 doc.y = yNotas + 20;
 
 
+// 🔥 FORMATO MONEDA
+const formato = (num) => {
+    return Number(num).toLocaleString("es-CO");
+};
+
 // 🔥 ABONOS
 doc.font("Helvetica-Bold").fontSize(12).text("ABONOS");
 doc.moveDown(0.8);
@@ -636,7 +641,13 @@ doc.text("Fecha", aCol2, yAbonos);
 doc.text("Saldo", aCol3, yAbonos);
 
 yAbonos += 15;
-doc.moveTo(50, yAbonos).lineTo(550, yAbonos).stroke();
+
+// 🔥 línea encabezado
+doc.lineWidth(1)
+   .moveTo(50, yAbonos)
+   .lineTo(550, yAbonos)
+   .stroke();
+
 yAbonos += 10;
 
 doc.font("Helvetica");
@@ -653,16 +664,39 @@ if (abonos.length === 0) {
               })
             : "Sin fecha";
 
-        doc.text(`$${a.monto}`, aCol1, yAbonos);
+        doc.text(`$${formato(a.monto)}`, aCol1, yAbonos);
         doc.text(fecha, aCol2, yAbonos);
-        doc.text(`$${a.saldo}`, aCol3, yAbonos);
+        doc.text(`$${formato(a.saldo)}`, aCol3, yAbonos);
 
         yAbonos += 20;
     });
 }
 
-doc.moveTo(50, yAbonos).lineTo(550, yAbonos).stroke();
-doc.y = yAbonos + 20;
+// 🔥 línea final más fuerte
+doc.lineWidth(1.5)
+   .moveTo(50, yAbonos)
+   .lineTo(550, yAbonos)
+   .stroke();
+
+doc.lineWidth(0.5);
+
+doc.y = yAbonos + 30;
+
+
+// 🔥 FIRMA (como pediste)
+const firmaY = doc.y;
+
+doc.moveTo(350, firmaY)
+   .lineTo(550, firmaY)
+   .stroke();
+
+doc.moveDown(0.5);
+
+doc.fontSize(10).text("Firma autorizada", 350, doc.y, {
+    width: 200,
+    align: "center"
+});
+
 
 // 🔥 FINALIZAR PDF
 doc.end();
@@ -671,8 +705,7 @@ doc.end();
     console.log(err);
     res.send("Error generando PDF");
 }
-}); // 👈 ESTE CIERRA app.get("/reporte-estudiante/:id")
-
+});
 /* ================= SERVER ================= */
 const PORT = process.env.PORT || 3000;
 
