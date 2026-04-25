@@ -589,27 +589,24 @@ doc.moveDown(0.5);
 
 if (notas.length === 0) {
     doc.font("Helvetica").text("No hay notas registradas");
-} else {
+} else 
     notas.forEach(n => {
 
-        const fecha = n.fecha
-            ? new Date(n.fecha).toLocaleDateString("es-CO")
-            : "Sin fecha";
+    const fecha = n.fecha
+        ? new Date(n.fecha).toLocaleDateString("es-CO", {
+            timeZone: "America/Bogota"
+          })
+        : "Sin fecha";
 
-        doc.font("Helvetica").fontSize(11);
+    doc.font("Helvetica").fontSize(11);
 
-        doc.text(n.materia, col1, doc.y);
-        doc.text(String(n.nota), col2, doc.y);
-        doc.text(fecha, col3, doc.y);
+    doc.text(n.materia, col1, doc.y);
+    doc.text(String(n.nota), col2, doc.y);
+    doc.text(fecha, col3, doc.y);
 
-        doc.moveDown(0.5);
-    });
-}
-
-doc.moveDown();
-doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
-doc.moveDown();
-
+    doc.moveDown(0.5);
+});
+   
         // 🔥 ABONOS
         doc.font("Helvetica-Bold").fontSize(12).text("ABONOS");
         doc.moveDown(0.5);

@@ -283,11 +283,12 @@ function cargar(){
     .catch(()=>alert("Error cargando notas"));
 }
 
-/* ================= FORMATO FECHA ================= */
 function formatearFecha(f){
     if(!f) return "";
-    const fecha = new Date(f);
-    return fecha.toLocaleDateString();
+
+    return new Date(f).toLocaleDateString("es-CO", {
+        timeZone: "America/Bogota"
+    });
 }
 
 /* ================= PINTAR TABLA ================= */
