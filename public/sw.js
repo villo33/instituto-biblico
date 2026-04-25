@@ -1,16 +1,25 @@
 self.addEventListener("install", e => {
   e.waitUntil(
-    caches.open("app-cache-v1").then(cache => {
+    caches.open("app-cache-v2").then(cache => {
       return cache.addAll([
-        "/",
         "/login.html",
         "/index.html",
+        "/notas.html",
+        "/pagos.html",
+        "/abonos.html",
         "/style.css",
         "/logo.jpg"
       ]);
     })
   );
 });
+
+self.addEventListener("fetch", e => {
+  e.respondWith(
+    caches.match(e.request).then(res => res || fetch(e.request))
+  );
+});
+    
 
 // 🔥 ACTIVAR (limpia versiones viejas)
 self.addEventListener("activate", e => {
