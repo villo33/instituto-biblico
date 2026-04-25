@@ -590,10 +590,12 @@ app.get("/reporte-estudiante/:id", async (req, res) => {
         if (abonos.length === 0) {
             doc.font("Helvetica").text("No hay abonos registrados");
         } else {
-            abonos.forEach(a => {
-                doc.font("Helvetica").fontSize(11)
-                   .text(`• $${a.monto}  |  Saldo restante: $${a.saldo}`);
-            });
+           abonos.forEach(a => {
+    const fecha = new Date(a.fecha).toLocaleDateString("es-CO");
+
+    doc.font("Helvetica").fontSize(11)
+       .text(`• $${a.monto}  |  Fecha: ${fecha}  |  Saldo: $${a.saldo}`);
+});
         }
 
         doc.moveDown(2);

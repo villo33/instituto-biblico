@@ -222,7 +222,7 @@ function cargar(){
                 <td>${a.id}</td>
                 <td id="est-${a.id}">...</td>
                 <td>$${formatear(a.monto)}</td>
-                <td>${a.fecha ? new Date(a.fecha).toLocaleDateString() : ""}</td>
+               <td>${a.fecha ? new Date(a.fecha).toLocaleDateString("es-CO") : ""}</td>
                 <td>
                     <div class="acciones">
                         <button class="btn eliminar" onclick="eliminar(${a.id})">🗑️</button>
