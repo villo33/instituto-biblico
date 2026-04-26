@@ -1,3 +1,5 @@
+const CACHE_NAME = "app-v1";
+
 self.addEventListener("install", event => {
   self.skipWaiting();
   console.log("SW instalado");
@@ -8,6 +10,9 @@ self.addEventListener("activate", event => {
 });
 
 self.addEventListener("fetch", event => {
-  if (!event.request.url.startsWith("http")) return;
-  event.respondWith(fetch(event.request));
+  event.respondWith(
+    fetch(event.request).catch(() => {
+      return new Response("Sin conexión");
+    })
+  );
 });

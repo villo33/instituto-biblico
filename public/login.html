@@ -6,6 +6,7 @@
 
 <meta name="theme-color" content="#007bff">
 <link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/logo.jpg">
 
 
 
@@ -139,6 +140,12 @@ function login(){
     .catch(()=> alert("Error en login"));
 }
 </script>
-
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js")
+    .then(() => console.log("SW listo"))
+    .catch(err => console.log("SW error", err));
+}
+</script>
 </body>
 </html>
