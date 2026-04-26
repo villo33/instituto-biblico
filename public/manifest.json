@@ -1,7 +1,7 @@
 {
   "name": "Instituto Bíblico",
   "short_name": "InstitutoBiblico",
-  "start_url": "/login.html",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
